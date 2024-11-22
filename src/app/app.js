@@ -36,8 +36,18 @@ const logger = (req, res, next) => {
     console.log(req.method, req.url, req.hostname);
     next();
 };
-app.get("/", logger, (req, res) => {
-    res.send("Server.... ....");
+app.get("/", logger, (req, res, next) => {
+    try {
+        res.send(something);
+    }
+    catch (err) {
+        console.log(err);
+        next(err);
+        // res.status(400).json({
+        //     success: false,
+        //     message: 'failed to get data'
+        // })
+    }
     console.log(req.query);
 });
 app.get("/hi/:userId/:subid", logger, (req, res) => {
@@ -49,5 +59,22 @@ app.post('/', (req, res) => {
         message: "successfully received data"
     });
     res.send("got data");
+});
+// 
+app.all("*", (req, res) => {
+    res.status(400).json({
+        success: false,
+        message: "Route is not found"
+    });
+});
+// global error handler
+app.use((error, req, res, next) => {
+    if (error) {
+        res.status(400).json({
+            success: false,
+            message: "something went wrong.."
+        });
+    }
+    console.log(error);
 });
 exports.default = app;

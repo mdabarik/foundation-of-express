@@ -41,8 +41,17 @@ const logger = (req: Request, res: Response, next: NextFunction) => {
 }
 
 
-app.get("/", logger, (req: Request, res: Response) => {
-    res.send("Server.... ....");
+app.get("/", logger, (req: Request, res: Response, next: NextFunction) => {
+    try {
+        res.send(something);
+    } catch (err) {
+        console.log(err);
+        next(err);
+        // res.status(400).json({
+        //     success: false,
+        //     message: 'failed to get data'
+        // })
+    }
     console.log(req.query);
 })
 
@@ -56,6 +65,25 @@ app.post('/', (req: Request, res: Response) => {
         message: "successfully received data"
     });
     res.send("got data");
+})
+
+// 
+app.all("*", (req: Request, res: Response) => {
+    res.status(400).json({
+        success: false,
+        message: "Route is not found"
+    })
+})
+
+// global error handler
+app.use((error: any, req: Request, res: Response, next: NextFunction) => {
+    if (error) {
+        res.status(400).json({
+            success: false,
+            message: "something went wrong.."
+        })
+    }
+    console.log(error);
 })
 
 export default app;
